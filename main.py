@@ -1,10 +1,11 @@
 import os
+from game import launch_game
 
 RED_BOLD = '\033[1;91m'
 BOLD = '\033[1m'
 RESET = '\033[0m'
 BLUE_BOLD = '\033[1;34m'
-YELLOW_BOLD = '\033[1;32m'
+GREEN_BOLD = '\033[1;32m'
 
 
 def clear_screen():
@@ -39,6 +40,7 @@ def show_menu():
     =============== OPTIONS ===============
 
              1.  Start a new game
+            2.  Continue your game
     """ + RESET
     print(menu)
 
@@ -48,10 +50,10 @@ def show_menu():
 def update_prompt(state):
     prompt=''
     if state == "menu":
-        prompt = RED_BOLD + 'pendu/menu>' + RESET
+        prompt = RED_BOLD + 'pendu/menu> ' + RESET
         return prompt
     elif state == "ingame":
-        prompt = YELLOW_BOLD + 'pendu/game>' + RESET
+        prompt = 'Lettre à tester ? '
         return prompt
 
 
@@ -64,7 +66,9 @@ def main():
     while True:
         choice = input(prompt)
         if (choice == '1' or choice == '1 '):
-            update_prompt("ingame")
+            clear_screen()
+            launch_game()
+            prompt = update_prompt("ingame")
         else:
             print(RED_BOLD + "INVALID CHOICE. PLEASE TRY AGAIN" + RESET)
 
