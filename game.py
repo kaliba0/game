@@ -1,6 +1,9 @@
 import random
+from prettytable import PrettyTable
 import os
 from pendu_ascii import draw
+from fx.fx import clear_screen, choisir_mot
+
 
 RED_BOLD = '\033[1;91m'
 GREEN_BOLD = '\033[1;32m'
@@ -13,15 +16,8 @@ errors = 0
 max_errors = 7
 tested_letters = []
 
-
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def choisir_mot():
-    with open(file, 'r') as f:
-        mots = f.read().splitlines()
-    return random.choice(mots)
+table = PrettyTable()
+table.field_names = ["Mot à deviner", "Lettre testées", "Pendu"]
 
 def afficher_mot(mot, lettres_trouvees):
     return ' '.join([lettre if lettre in lettres_trouvees else '_' for lettre in mot])
@@ -30,35 +26,12 @@ def afficher_lettres_testees():
     return ', '.join(tested_letters)
 
 def afficher_statut(mot, lettres_trouvees):
-    # Clear screen and display the structured interface
     clear_screen()
-    
-    # Mot à deviner (en haut à gauche)
-    print("╔══════════════════════════════════════════════╗")
-    print("║               MOT À DEVINER                 ║")
-    print("╠══════════════════════════════════════════════╣")
-    print(f"║ {GREEN_BOLD} {afficher_mot(mot, lettres_trouvees)} {RESET}")
-    print("╚══════════════════════════════════════════════╝")
-    
-    # Lettres testées (en bas à gauche)
-    print("╔══════════════════════════════════════════════╗")
-    print("║               LETTRES TESTÉES                ║")
-    print("╠══════════════════════════════════════════════╣")
-    print(f"║ {RED_BOLD} {afficher_lettres_testees()} {RESET}")
-    print("╚══════════════════════════════════════════════╝")
-    
-    # Nombre d'essais restants et le dessin du pendu (à droite)
-    print("╔══════════════════════════════════════════════╗")
-    print("║         NOMBRE D'ESSAIS RESTANTS             ║")
-    print("╠══════════════════════════════════════════════╣")
-    print(f"║ {BLUE_BOLD} {max_errors - errors} {RESET}")
-    print("╚══════════════════════════════════════════════╝")
-    
-    print("╔══════════════════════════════════════════════╗")
-    print("║               DESSIN DU PENDU                ║")
-    print("╠══════════════════════════════════════════════╣")
-    print(draw(errors))  # Always show the initial drawing even if no errors
-    print("╚══════════════════════════════════════════════╝")
+    found_letters = f"║ {GREEN_BOLD} {afficher_mot(mot, lettres_trouvees)} {RESET}"
+    letters = f"║ {RED_BOLD} {afficher_lettres_testees()} {RESET}"
+    pendu = f'{BLUE_BOLD} {max_errors - errors} {RESET} \n {draw(errors)}'
+    table.add_row([found_letters, letters, pendu])
+
 
 def launch_game():
     global errors, tested_letters
