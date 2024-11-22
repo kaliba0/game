@@ -1,9 +1,8 @@
 import random
 from prettytable import PrettyTable
-import os
 from pendu_ascii import draw
 from fx.fx import clear_screen, choisir_mot
-
+import time
 
 RED_BOLD = '\033[1;91m'
 GREEN_BOLD = '\033[1;32m'
@@ -11,57 +10,83 @@ BLUE_BOLD = '\033[1;34m'
 RESET = '\033[0m'
 BOLD = '\033[1m'
 
-file = 'words.txt'
 errors = 0
 max_errors = 7
 tested_letters = []
 
-table = PrettyTable()
-table.field_names = ["Mot à deviner", "Lettre testées", "Pendu"]
+def init_table():
+    table = PrettyTable()
+    table.field_names = ["Word to Guess", "Tested Letters", "Pendu"]
 
-def afficher_mot(mot, lettres_trouvees):
-    return ' '.join([lettre if lettre in lettres_trouvees else '_' for lettre in mot])
+    table.align["Word to Guess"] = "c"
+    table.align["Tested Letters"] = "c"
+    table.align["Pendu"] = "c"
 
-def afficher_lettres_testees():
-    return ', '.join(tested_letters)
+    table.max_width["Word to Guess"] = 25
+    table.max_width["Tested Letters"] = 20
+    table.max_width["Pendu"] = 40
 
-def afficher_statut(mot, lettres_trouvees):
+    table.hrules = 1
+    table.junction_char = "╬"
+    table.horizontal_char = "═"
+    table.vertical_char = "║"
+    table.horizontal_align_char = "═"
+
+    return table
+
+def display_word(word, found_letters):
+    return ' '.join([letter if letter in found_letters else '_' for letter in word])
+
+def display_tested_letters():
+    return ', '.join(sorted(tested_letters))
+
+def display_status(word, found_letters):
+    table = init_table()
+
+    displayed_word = f"{GREEN_BOLD}{display_word(word, found_letters)}{RESET}"
+    displayed_letters = f"{RED_BOLD}{display_tested_letters() or 'None'}{RESET}"
+    pendu_display = f"{BLUE_BOLD}{max_errors - errors} errors remaining{RESET}\n{draw(errors)}"
+
+    table.add_row([displayed_word, displayed_letters, pendu_display])
     clear_screen()
-    found_letters = f"║ {GREEN_BOLD} {afficher_mot(mot, lettres_trouvees)} {RESET}"
-    letters = f"║ {RED_BOLD} {afficher_lettres_testees()} {RESET}"
-    pendu = f'{BLUE_BOLD} {max_errors - errors} {RESET} \n {draw(errors)}'
-    table.add_row([found_letters, letters, pendu])
-
+    print(table)
 
 def launch_game():
     global errors, tested_letters
     errors = 0
     tested_letters = []
-    mot = choisir_mot()
-    lettres_trouvees = set()
+    word = choisir_mot().upper()
+    found_letters = set()
 
     while errors < max_errors:
-        afficher_statut(mot, lettres_trouvees)
+        display_status(word, found_letters)
 
-        lettre = input("Lettre à tester ? ").upper()
-        if lettre in tested_letters:
-            print(RED_BOLD + "Vous avez déjà essayé cette lettre !" + RESET)
+        letter = input("Letter to guess? ").upper()
+        if not letter.isalpha() or len(letter) != 1:
+            print(RED_BOLD + "Please enter a single valid letter!" + RESET)
+            time.sleep(1)
             continue
 
-        tested_letters.append(lettre)
+        if letter in tested_letters:
+            print(RED_BOLD + "You have already tried this letter!" + RESET)
+            time.sleep(1)
+            continue
 
-        if lettre in mot:
-            lettres_trouvees.add(lettre)
-            print(GREEN_BOLD + "Bien joué !" + RESET)
+        tested_letters.append(letter)
+
+        if letter in word:
+            found_letters.add(letter)
+            print(GREEN_BOLD + "Well done!" + RESET)
+            time.sleep(1)
         else:
             errors += 1
-            print(RED_BOLD + "Lettre incorrecte !" + RESET)
+            print(RED_BOLD + "Incorrect letter!" + RESET)
+            time.sleep(1)
 
-        if all([lettre in lettres_trouvees for lettre in mot]):
-            afficher_statut(mot, lettres_trouvees)
-            print(GREEN_BOLD + "Félicitations ! Vous avez gagné." + RESET)
+        if all([letter in found_letters for letter in word]):
+            display_status(word, found_letters)
+            print(GREEN_BOLD + "Congratulations! You won." + RESET)
             break
-
     else:
-        afficher_statut(mot, lettres_trouvees)
-        print(RED_BOLD + "Dommage ! Le mot était : " + mot + RESET)
+        display_status(word, found_letters)
+        print(RED_BOLD + f"Too bad! The word was: {word}" + RESET)
