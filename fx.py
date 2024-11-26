@@ -1,7 +1,7 @@
 import random
 from prettytable import PrettyTable
+import os
 from pendu_ascii import draw
-from fx.fx import clear_screen, choisir_mot
 import time
 
 RED_BOLD = '\033[1;91m'
@@ -10,27 +10,35 @@ BLUE_BOLD = '\033[1;34m'
 RESET = '\033[0m'
 BOLD = '\033[1m'
 
-errors = 0
+file = 'words.txt'
 max_errors = 7
-tested_letters = []
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def choisir_mot():
+    with open(file, 'r') as f:
+        mots = f.read().splitlines()
+    return random.choice(mots)
 
 def init_table():
     table = PrettyTable()
-    table.field_names = ["Word to Guess", "Tested Letters", "Pendu"]
+    table.field_names = [f"{GREEN_BOLD}Word to Guess{RESET}", f"{RED_BOLD}Tested Letters{RESET}", f"{BLUE_BOLD}Pendu{RESET}"]
 
-    table.align["Word to Guess"] = "c"
-    table.align["Tested Letters"] = "c"
-    table.align["Pendu"] = "c"
-
-    table.max_width["Word to Guess"] = 25
-    table.max_width["Tested Letters"] = 20
-    table.max_width["Pendu"] = 40
+    table.align[f"{GREEN_BOLD}Word to Guess{RESET}"] = "c"
+    table.align[f"{RED_BOLD}Tested Letters{RESET}"] = "c"
+    table.align[f"{BLUE_BOLD}Pendu{RESET}"] = "c"
+    table.min_width[f"{GREEN_BOLD}Word to Guess{RESET}"] = 25
+    table.min_width[f"{RED_BOLD}Tested Letters{RESET}"] = 20
+    table.min_width[f"{BLUE_BOLD}Pendu{RESET}"] = 30
+    table.max_width[f"{GREEN_BOLD}Word to Guess{RESET}"] = 35
+    table.max_width[f"{RED_BOLD}Tested Letters{RESET}"] = 30
+    table.max_width[f"{BLUE_BOLD}Pendu{RESET}"] = 50
 
     table.hrules = 1
-    table.junction_char = "╬"
+    table.junction_char = "+"
     table.horizontal_char = "═"
     table.vertical_char = "║"
-    table.horizontal_align_char = "═"
 
     return table
 
@@ -90,3 +98,4 @@ def launch_game():
     else:
         display_status(word, found_letters)
         print(RED_BOLD + f"Too bad! The word was: {word}" + RESET)
+        time.sleep(5)

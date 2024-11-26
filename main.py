@@ -1,13 +1,10 @@
 import os
-from game import launch_game
+from fx import launch_game, clear_screen
 
 RED_BOLD = '\033[1;91m'
 BOLD = '\033[1m'
 RESET = '\033[0m'
 BLUE_BOLD = '\033[1;34m'
-
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 def show_banner():
     banner = RED_BOLD + """
@@ -37,24 +34,16 @@ def show_menu():
     """ + RESET
     print(menu)
 
-def update_prompt(state):
-    if state == "menu":
-        return RED_BOLD + 'pendu/menu> ' + RESET
-    elif state == "ingame":
-        return 'Lettre à tester ? '
-
 def main():
-    prompt = update_prompt("menu")
     clear_screen()
     show_banner()
     show_menu()
 
     while True:
-        choice = input(prompt)
+        choice = input(RED_BOLD + 'pendu/menu> ' + RESET)
         if choice.strip() == '1':
             clear_screen()
             launch_game()
-            prompt = update_prompt("ingame")
         else:
             print(RED_BOLD + "INVALID CHOICE. PLEASE TRY AGAIN" + RESET)
 
