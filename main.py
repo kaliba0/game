@@ -20,7 +20,7 @@ def show_banner():
 ╚───────────────────────────────────────────────╝
     """ + RESET
 
-    infos = f'{BOLD} CREATED ON 11/24 BY {BLUE_BOLD} ANTOINE {RED_BOLD} (NOT KILLIAN) {RESET}'
+    infos = f'    {BOLD} CREATED ON 11/24 BY {BLUE_BOLD}ANTOINE & KILLIAN {RESET}'
     print(banner)
     print(infos)
 
