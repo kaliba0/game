@@ -2,4 +2,8 @@
 > By Peyrin Killian & Terzian Antoine
 
 ### Before running :
-- istall the requirements.txt with the `pip -m install requirements.txt` command
+- install the requirements.txt with the `pip -m install requirements.txt` command
+
+### Notes :
+- website non responsive
+- 
