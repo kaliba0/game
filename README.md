@@ -6,4 +6,5 @@
 
 ### Notes :
 - website non responsive
-- 
+- all instructions on it
+- hosted by firebase
