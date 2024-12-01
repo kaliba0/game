@@ -10,7 +10,12 @@ BLUE_BOLD = '\033[1;34m'
 RESET = '\033[0m'
 BOLD = '\033[1m'
 
-file = 'words.txt'
+file = os.path.join(os.path.dirname(__file__), 'words.txt')
+
+if not os.path.exists(file):
+    print(f"Le fichier '{file}' est introuvable.")
+    exit(1)
+
 max_errors = 7
 
 def clear_screen():
