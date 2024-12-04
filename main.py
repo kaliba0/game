@@ -1,5 +1,5 @@
 import os
-from fx import launch_game, clear_screen
+from fx import launch_game, clear_screen, resume_game
 
 RED_BOLD = '\033[1;91m'
 BOLD = '\033[1m'
@@ -44,6 +44,15 @@ def main():
         if choice.strip() == '1':
             clear_screen()
             launch_game()
+            clear_screen()
+            show_banner()
+            show_menu()
+        elif choice.strip() == '2':
+            clear_screen()
+            resume_game()
+            clear_screen()
+            show_banner()
+            show_menu()
         else:
             print(RED_BOLD + "INVALID CHOICE. PLEASE TRY AGAIN" + RESET)
 

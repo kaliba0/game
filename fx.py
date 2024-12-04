@@ -3,6 +3,7 @@ from prettytable import PrettyTable
 import os
 from pendu_ascii import draw
 import time
+import json
 
 RED_BOLD = '\033[1;91m'
 GREEN_BOLD = '\033[1;32m'
@@ -11,6 +12,7 @@ RESET = '\033[0m'
 BOLD = '\033[1m'
 
 file = os.path.join(os.path.dirname(__file__), 'words.txt')
+game_state_file = os.path.join(os.path.dirname(__file__), 'saved_game.json')
 
 if not os.path.exists(file):
     print(f"Le fichier '{file}' est introuvable.")
@@ -50,32 +52,61 @@ def init_table():
 def display_word(word, found_letters):
     return ' '.join([letter if letter in found_letters else '_' for letter in word])
 
-def display_tested_letters():
+def display_tested_letters(tested_letters):
     return ', '.join(sorted(tested_letters))
 
-def display_status(word, found_letters):
+def display_status(word, found_letters, errors, tested_letters):
     table = init_table()
 
     displayed_word = f"{GREEN_BOLD}{display_word(word, found_letters)}{RESET}"
-    displayed_letters = f"{RED_BOLD}{display_tested_letters() or 'None'}{RESET}"
+    displayed_letters = f"{RED_BOLD}{display_tested_letters(tested_letters) or 'None'}{RESET}"
     pendu_display = f"{BLUE_BOLD}{max_errors - errors} errors remaining{RESET}\n{draw(errors)}"
 
     table.add_row([displayed_word, displayed_letters, pendu_display])
     clear_screen()
     print(table)
 
-def launch_game():
-    global errors, tested_letters
-    errors = 0
-    tested_letters = []
-    word = choisir_mot().upper()
-    found_letters = set()
+def save_game_state(state):
+    with open(game_state_file, 'w') as f:
+        json.dump(state, f)
+
+def load_game_state():
+    with open(game_state_file, 'r') as f:
+        return json.load(f)
+
+def delete_saved_game():
+    if os.path.exists(game_state_file):
+        os.remove(game_state_file)
+
+def launch_game(state=None):
+    if state:
+        errors = state['errors']
+        tested_letters = state['tested_letters']
+        word = state['word']
+        found_letters = set(state['found_letters'])
+    else:
+        delete_saved_game()
+        errors = 0
+        tested_letters = []
+        word = choisir_mot().upper()
+        found_letters = set()
 
     while errors < max_errors:
-        display_status(word, found_letters)
+        display_status(word, found_letters, errors, tested_letters)
 
         letter = input("Letter to guess? ").upper()
-        if not letter.isalpha() or len(letter) != 1:
+        if letter.lower() == 'pause':
+            game_state = {
+                'errors': errors,
+                'tested_letters': tested_letters,
+                'word': word,
+                'found_letters': list(found_letters)
+            }
+            save_game_state(game_state)
+            print(BLUE_BOLD + "Game paused. Returning to menu." + RESET)
+            time.sleep(2)
+            return
+        elif not letter.isalpha() or len(letter) != 1:
             print(RED_BOLD + "Please enter a single valid letter!" + RESET)
             time.sleep(1)
             continue
@@ -97,10 +128,22 @@ def launch_game():
             time.sleep(1)
 
         if all([letter in found_letters for letter in word]):
-            display_status(word, found_letters)
+            display_status(word, found_letters, errors, tested_letters)
             print(GREEN_BOLD + "Congratulations! You won." + RESET)
+            delete_saved_game()
+            time.sleep(10)
             break
     else:
-        display_status(word, found_letters)
+        display_status(word, found_letters, errors, tested_letters)
         print(RED_BOLD + f"Too bad! The word was: {word}" + RESET)
-        time.sleep(5)
+        delete_saved_game()
+        time.sleep(10)
+
+def resume_game():
+    if not os.path.exists(game_state_file):
+        print(RED_BOLD + "No saved game found. Starting a new game." + RESET)
+        time.sleep(2)
+        launch_game()
+    else:
+        state = load_game_state()
+        launch_game(state)
