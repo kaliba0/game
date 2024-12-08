@@ -75,13 +75,13 @@ a:hover {
     border-radius: 10px;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
-    transform: scale(1); /* Taille initiale */
+    transform: scale(1);
 }
 
 .sidebar nav a:hover {
     background: white;
     color: black;
-    transform: scale(1.03); /* Agrandissement léger à 105% */
+    transform: scale(1.03); 
 }
 
 .sidebar nav a.active {
