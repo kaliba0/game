@@ -21,14 +21,25 @@ if not os.path.exists(file):
 max_errors = 7
 
 def clear_screen():
+    """
+    Efface l'écran du terminal.
+    """
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def choisir_mot():
+def choisir_mot() -> str:
+    """
+    Choisit un mot au hasard depuis le fichier.
+    :return: Le mot choisi.
+    """
     with open(file, 'r') as f:
         mots = f.read().splitlines()
     return random.choice(mots)
 
-def init_table():
+def init_table() -> PrettyTable:
+    """
+    Initialise et retourne la table du tableau d'affichage.
+    :return: Une instance de PrettyTable.
+    """
     table = PrettyTable()
     table.field_names = [f"{GREEN_BOLD}Word to Guess{RESET}", f"{RED_BOLD}Tested Letters{RESET}", f"{BLUE_BOLD}Pendu{RESET}"]
 
@@ -49,13 +60,31 @@ def init_table():
 
     return table
 
-def display_word(word, found_letters):
+def display_word(word: str, found_letters: set) -> str:
+    """
+    Affiche le mot avec les lettres trouvées et des '_' pour celles manquantes.
+    :param word: Le mot à deviner.
+    :param found_letters: Les lettres déjà trouvées.
+    :return: Une chaîne avec les lettres trouvées et les '_' pour les manquantes.
+    """
     return ' '.join([letter if letter in found_letters else '_' for letter in word])
 
-def display_tested_letters(tested_letters):
+def display_tested_letters(tested_letters: list[str]) -> str:
+    """
+    Affiche les lettres déjà testées.
+    :param tested_letters: La liste des lettres déjà testées.
+    :return: Une chaîne avec les lettres testées.
+    """
     return ', '.join(sorted(tested_letters))
 
-def display_status(word, found_letters, errors, tested_letters):
+def display_status(word: str, found_letters: set, errors: int, tested_letters: list[str]):
+    """
+    Affiche l'état actuel du jeu.
+    :param word: Le mot à deviner.
+    :param found_letters: Les lettres déjà trouvées.
+    :param errors: Le nombre d'erreurs commises.
+    :param tested_letters: Les lettres déjà testées.
+    """
     table = init_table()
 
     displayed_word = f"{GREEN_BOLD}{display_word(word, found_letters)}{RESET}"
@@ -66,19 +95,34 @@ def display_status(word, found_letters, errors, tested_letters):
     clear_screen()
     print(table)
 
-def save_game_state(state):
+def save_game_state(state: dict):
+    """
+    Sauvegarde l'état actuel de la partie dans un fichier JSON.
+    :param state: Dictionnaire contenant l'état du jeu.
+    """
     with open(game_state_file, 'w') as f:
         json.dump(state, f)
 
-def load_game_state():
+def load_game_state() -> dict:
+    """
+    Charge et retourne l'état de la partie depuis le fichier JSON.
+    :return: Dictionnaire contenant l'état du jeu.
+    """
     with open(game_state_file, 'r') as f:
         return json.load(f)
 
 def delete_saved_game():
+    """
+    Supprime le fichier de sauvegarde s'il existe.
+    """
     if os.path.exists(game_state_file):
         os.remove(game_state_file)
 
-def launch_game(state=None):
+def launch_game(state: dict = None):
+    """
+    Lance une partie de pendu, avec état existant ou nouveau.
+    :param state: Dictionnaire contenant l'état du jeu ou None pour une nouvelle partie.
+    """
     if state:
         errors = state['errors']
         tested_letters = state['tested_letters']
@@ -107,12 +151,12 @@ def launch_game(state=None):
             time.sleep(2)
             return
         elif not letter.isalpha() or len(letter) != 1:
-            print(RED_BOLD + "Please enter a single valid letter!" + RESET)
+            print(RED_BOLD + "Veuillez entrer une lettre valide !" + RESET)
             time.sleep(1)
             continue
 
         if letter in tested_letters:
-            print(RED_BOLD + "You have already tried this letter!" + RESET)
+            print(RED_BOLD + "Vous avez déjà testé cette lettre !" + RESET)
             time.sleep(1)
             continue
 
@@ -120,28 +164,31 @@ def launch_game(state=None):
 
         if letter in word:
             found_letters.add(letter)
-            print(GREEN_BOLD + "Well done!" + RESET)
+            print(GREEN_BOLD + "Bien joué !" + RESET)
             time.sleep(1)
         else:
             errors += 1
-            print(RED_BOLD + "Incorrect letter!" + RESET)
+            print(RED_BOLD + "Lettre incorrecte !" + RESET)
             time.sleep(1)
 
-        if all([letter in found_letters for letter in word]):
+        if all([l in found_letters for l in word]):
             display_status(word, found_letters, errors, tested_letters)
-            print(GREEN_BOLD + "Congratulations! You won." + RESET)
+            print(GREEN_BOLD + "Félicitations ! Vous avez gagné." + RESET)
             delete_saved_game()
             time.sleep(10)
             break
     else:
         display_status(word, found_letters, errors, tested_letters)
-        print(RED_BOLD + f"Too bad! The word was: {word}" + RESET)
+        print(RED_BOLD + f"Dommage ! Le mot était : {word}" + RESET)
         delete_saved_game()
         time.sleep(10)
 
 def resume_game():
+    """
+    Reprend une partie précédemment mise en pause.
+    """
     if not os.path.exists(game_state_file):
-        print(RED_BOLD + "No saved game found. Starting a new game." + RESET)
+        print(RED_BOLD + "Aucune partie sauvegardée. Nouvelle partie commencée." + RESET)
         time.sleep(2)
         launch_game()
     else:
